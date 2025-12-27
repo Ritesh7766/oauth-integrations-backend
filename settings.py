@@ -1,14 +1,22 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class Settings(BaseSettings):
-    notion_client_id: str
-    notion_client_secret: str
-    notion_auth_url: str
+class AppSettings(BaseSettings):
     redis_url: str
 
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(env_file=".env")
 
 
-settings = Settings()
+class NotionSettings(BaseSettings):
+    client_id: str
+    client_secret: str
+    auth_url: str
+
+    model_config = SettingsConfigDict(
+        env_prefix="NOTION_",
+        env_file=".env",
+    )
+
+
+app_settings = AppSettings()
+notion_settings = NotionSettings()
