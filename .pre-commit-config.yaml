@@ -24,7 +24,9 @@ repos:
         additional_dependencies:
         - pydantic-settings
         - pydantic
-        args: []
+        - requests
+        - types-requests
+        args: [--ignore-missing-imports]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.10
