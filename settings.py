@@ -5,7 +5,7 @@ import base64
 class AppSettings(BaseSettings):
     redis_url: str
 
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
 class NotionSettings(BaseSettings):
@@ -17,6 +17,7 @@ class NotionSettings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="NOTION_",
         env_file=".env",
+        extra="ignore",
     )
 
     @property
