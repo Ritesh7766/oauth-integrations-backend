@@ -77,7 +77,7 @@ async def oauth2callback_notion(request: Request) -> HTMLResponse:
     return HTMLResponse(content=close_window_script)
 
 
-async def get_notion_credentials(user_id, org_id):
+async def get_notion_credentials(user_id: str, org_id: str):
     credentials = await get_value_redis(f"notion_credentials:{org_id}:{user_id}")
     if not credentials:
         raise HTTPException(status_code=400, detail="No credentials found.")
@@ -89,7 +89,7 @@ async def get_notion_credentials(user_id, org_id):
     return credentials
 
 
-def _recursive_dict_search(data, target_key):
+def _recursive_dict_search(data: dict[str, Any], target_key: str) -> Any | None:
     """Recursively search for a key in a dictionary of dictionaries."""
     if target_key in data:
         return data[target_key]
@@ -139,13 +139,13 @@ def create_integration_item_metadata_object(
     return integration_item_metadata
 
 
-async def get_items_notion(credentials) -> list[IntegrationItem] | None:
+async def get_items_notion(credentials: str) -> list[IntegrationItem] | None:
     """Aggregates all metadata relevant for a notion integration"""
-    credentials = json.loads(credentials)
+    parsed_credentials = json.loads(credentials)
     response = requests.post(
         "https://api.notion.com/v1/search",
         headers={
-            "Authorization": f'Bearer {credentials.get("access_token")}',
+            "Authorization": f'Bearer {parsed_credentials.get("access_token")}',
             "Notion-Version": "2022-06-28",
         },
     )
