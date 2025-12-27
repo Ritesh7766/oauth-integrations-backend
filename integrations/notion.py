@@ -55,9 +55,11 @@ async def oauth2callback_notion(request: Request) -> HTMLResponse:
     encoded_state = request.query_params.get("state")
     state_data = json.loads(encoded_state)
 
-    original_state = state_data.get("state")
-    user_id = state_data.get("user_id")
-    org_id = state_data.get("org_id")
+    original_state, user_id, org_id = (
+        state_data.get("state"),
+        state_data.get("user_id"),
+        state_data.get("org_id"),
+    )
 
     saved_state = await get_value_redis(f"notion_state:{org_id}:{user_id}")
 
