@@ -14,6 +14,26 @@ from settings import notion_settings
 from redis_client import add_key_value_redis, get_value_redis, delete_key_redis
 
 
+def _recursive_dict_search(data: list | dict[str, Any], target_key: str) -> Any | None:
+    """Recursively search for a key in a dictionary of dictionaries."""
+    if isinstance(data, dict):
+        if target_key in data:
+            return data[target_key]
+
+        for value in data.values():
+            result = _recursive_dict_search(value, target_key)
+            if result is not None:
+                return result
+
+    elif isinstance(data, list):
+        for item in data:
+            result = _recursive_dict_search(item, target_key)
+            if result is not None:
+                return result
+
+    return None
+
+
 async def authorize_notion(user_id: str, org_id: str) -> str:
     state_data = {
         "state": secrets.token_urlsafe(32),
@@ -87,25 +107,6 @@ async def get_notion_credentials(user_id: str, org_id: str):
     await delete_key_redis(f"notion_credentials:{org_id}:{user_id}")
 
     return credentials
-
-
-def _recursive_dict_search(data: dict[str, Any], target_key: str) -> Any | None:
-    """Recursively search for a key in a dictionary of dictionaries."""
-    if target_key in data:
-        return data[target_key]
-
-    for value in data.values():
-        if isinstance(value, dict):
-            result = _recursive_dict_search(value, target_key)
-            if result is not None:
-                return result
-        elif isinstance(value, list):
-            for item in value:
-                if isinstance(item, dict):
-                    result = _recursive_dict_search(item, target_key)
-                    if result is not None:
-                        return result
-    return None
 
 
 def create_integration_item_metadata_object(
