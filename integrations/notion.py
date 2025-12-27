@@ -109,7 +109,7 @@ def _recursive_dict_search(data, target_key):
 
 
 def create_integration_item_metadata_object(
-    response_json: dict[Any, Any],
+    response_json: dict[str, Any],
 ) -> IntegrationItem:
     """creates an integration metadata object from the response"""
     name = _recursive_dict_search(response_json["properties"], "content")
