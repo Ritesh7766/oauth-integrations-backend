@@ -53,7 +53,7 @@ async def oauth2callback_notion(request: Request) -> HTMLResponse:
         raise HTTPException(status_code=400, detail=request.query_params.get("error"))
     code = request.query_params.get("code")
     encoded_state = request.query_params.get("state")
-    state_data = json.loads(encoded_state)
+    state_data = json.loads(encoded_state.encode("utf-8").decode("unicode_escape"))
 
     original_state, user_id, org_id = (
         state_data.get("state"),
