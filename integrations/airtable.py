@@ -1,20 +1,20 @@
 # airtable.py
 
-import json
-import secrets
-from typing import Any
-from fastapi import Request, HTTPException, Response
-from fastapi.responses import HTMLResponse
-import httpx
 import asyncio
 import base64
 import hashlib
+import json
+import secrets
+from typing import Any
 
+from fastapi import HTTPException, Request, Response
+from fastapi.responses import HTMLResponse
+import httpx
 import requests
-from integrations.integration_item import IntegrationItem
-from settings import AirtableSettings
 
-from redis_client import add_key_value_redis, get_value_redis, delete_key_redis
+from integrations.integration_item import IntegrationItem
+from redis_client import add_key_value_redis, delete_key_redis, get_value_redis
+from settings import AirtableSettings
 
 
 async def authorize_airtable(user_id: str, org_id: str) -> str:
@@ -47,7 +47,7 @@ async def authorize_airtable(user_id: str, org_id: str) -> str:
     return auth_url
 
 
-async def oauth2callback_airtable(request: Request):
+async def oauth2callback_airtable(request: Request) -> HTMLResponse:
     if request.query_params.get("error"):
         raise HTTPException(
             status_code=400, detail=request.query_params.get("error_description")
@@ -67,7 +67,6 @@ async def oauth2callback_airtable(request: Request):
 
     if not saved_state or original_state != json.loads(saved_state).get("state"):
         raise HTTPException(status_code=400, detail="State does not match.")
-
     async with httpx.AsyncClient() as client:
         response, _, _ = await asyncio.gather(
             client.post(
@@ -87,7 +86,6 @@ async def oauth2callback_airtable(request: Request):
             delete_key_redis(f"airtable_state:{org_id}:{user_id}"),
             delete_key_redis(f"airtable_verifier:{org_id}:{user_id}"),
         )
-
     await add_key_value_redis(
         f"airtable_credentials:{org_id}:{user_id}",
         json.dumps(response.json()),
@@ -104,7 +102,7 @@ async def oauth2callback_airtable(request: Request):
     return HTMLResponse(content=close_window_script)
 
 
-async def get_airtable_credentials(user_id, org_id):
+async def get_airtable_credentials(user_id: str, org_id: str) -> dict[str, Any]:
     credentials = await get_value_redis(f"airtable_credentials:{org_id}:{user_id}")
     if not credentials:
         raise HTTPException(status_code=400, detail="No credentials found.")
@@ -143,7 +141,6 @@ def fetch_items(
 
         for item in results:
             aggregated_response.append(item)
-
         if offset is not None:
             fetch_items(access_token, url, aggregated_response, offset)
         else:
@@ -176,6 +173,5 @@ async def get_items_airtable(credentials) -> list[IntegrationItem]:
                         response.get("name", None),
                     )
                 )
-
     print(f"list_of_integration_item_metadata: {list_of_integration_item_metadata}")
     return list_of_integration_item_metadata

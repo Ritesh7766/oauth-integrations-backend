@@ -99,7 +99,7 @@ async def oauth2callback_notion(request: Request) -> HTMLResponse:
     return HTMLResponse(content=close_window_script)
 
 
-async def get_notion_credentials(user_id: str, org_id: str):
+async def get_notion_credentials(user_id: str, org_id: str) -> dict[str, Any]:
     key = f"notion_credentials:{org_id}:{user_id}"
 
     raw = await get_value_redis(key)
