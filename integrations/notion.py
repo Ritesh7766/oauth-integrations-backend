@@ -1,17 +1,18 @@
 # notion.py
 
+import asyncio
 import json
 import secrets
 from typing import Any
-from fastapi import Request, HTTPException
+
+from fastapi import HTTPException, Request
 from fastapi.responses import HTMLResponse
 import httpx
-import asyncio
 import requests
-from integrations.integration_item import IntegrationItem
-from settings import notion_settings
 
-from redis_client import add_key_value_redis, get_value_redis, delete_key_redis
+from integrations.integration_item import IntegrationItem
+from redis_client import add_key_value_redis, delete_key_redis, get_value_redis
+from settings import notion_settings
 
 
 def _recursive_dict_search(data: list | dict[str, Any], target_key: str) -> Any | None:
@@ -67,6 +68,7 @@ async def oauth2callback_notion(request: Request) -> HTMLResponse:
         raise HTTPException(status_code=400, detail="State does not match.")
 
     async with httpx.AsyncClient() as client:
+        encoded_client_id_secret = notion_settings.encoded_client_id_secret
         response, _ = await asyncio.gather(
             client.post(
                 "https://api.notion.com/v1/oauth/token",
@@ -76,7 +78,7 @@ async def oauth2callback_notion(request: Request) -> HTMLResponse:
                     "redirect_uri": notion_settings.redirect_uri,
                 },
                 headers={
-                    "Authorization": f"Basic {notion_settings.encoded_client_id_secret}",
+                    "Authorization": f"Basic {encoded_client_id_secret}",
                     "Content-Type": "application/json",
                 },
             ),
