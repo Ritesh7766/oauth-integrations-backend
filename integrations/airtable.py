@@ -14,7 +14,7 @@ import requests
 
 from integrations.integration_item import IntegrationItem
 from redis_client import add_key_value_redis, delete_key_redis, get_value_redis
-from settings import AirtableSettings
+from settings import airtable_settings
 
 
 async def authorize_airtable(user_id: str, org_id: str) -> str:
@@ -39,7 +39,7 @@ async def authorize_airtable(user_id: str, org_id: str) -> str:
         "schema.bases:read schema.bases:write"
     )
     auth_url = (
-        f"{AirtableSettings.auth_url}"
+        f"{airtable_settings.auth_url}"
         f"&state={encoded_state}"
         f"&code_challenge={code_challenge}"
         f"&code_challenge_method=S256"
@@ -78,15 +78,15 @@ async def oauth2callback_airtable(request: Request) -> HTMLResponse:
     if not saved_state or original_state != json.loads(saved_state).get("state"):
         raise HTTPException(status_code=400, detail="State does not match.")
     async with httpx.AsyncClient() as client:
-        encoded_client_id_secret = AirtableSettings.encoded_client_id_secret
+        encoded_client_id_secret = airtable_settings.encoded_client_id_secret
         response, _, _ = await asyncio.gather(
             client.post(
                 "https://airtable.com/oauth2/v1/token",
                 data={
                     "grant_type": "authorization_code",
                     "code": code,
-                    "redirect_uri": AirtableSettings.redirect_uri,
-                    "client_id": AirtableSettings.client_id,
+                    "redirect_uri": airtable_settings.redirect_uri,
+                    "client_id": airtable_settings.client_id,
                     "code_verifier": code_verifier.decode("utf-8"),
                 },
                 headers={
