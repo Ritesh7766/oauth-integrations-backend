@@ -78,11 +78,12 @@ AIRTABLE_REDIRECT_URI=http://localhost:8000/integrations/airtable/oauth2callback
 
 ## Available Integrations
 
-| Service   | OAuth | Fetch Items |
-|----------|------|-------------|
-| Notion   | Yes  | Yes |
-| HubSpot  | Yes  | Yes |
-| Airtable | Yes (PKCE) | Yes |
+| Service   | OAuth      | Fetch Items |
+|-----------|------------|-------------|
+| Notion    | Yes        | Yes         |
+| HubSpot   | Yes        | Yes         |
+| Airtable  | Yes (PKCE) | Yes         |
+
 
 ---
 
