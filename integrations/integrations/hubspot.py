@@ -117,5 +117,5 @@ class HubSpotIntegration(OAuthIntegration):
                     name=result.get("properties", {}).get("name"),
                 )
             )
-        print(list_of_integration_item_metadata)  # Print it out for now
+
         return list_of_integration_item_metadata

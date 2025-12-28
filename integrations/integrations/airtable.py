@@ -182,5 +182,5 @@ class AirtableIntegration(OAuthIntegration):
                             response.get("name", None),
                         )
                     )
-        print(f"list_of_integration_item_metadata: {list_of_integration_item_metadata}")
+
         return list_of_integration_item_metadata

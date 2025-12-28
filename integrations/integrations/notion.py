@@ -157,5 +157,5 @@ class NotionIntegration(OAuthIntegration):
         list_of_integration_item_metadata = [
             create_integration_item_metadata_object(result) for result in results
         ]
-        print(list_of_integration_item_metadata)
+
         return list_of_integration_item_metadata
