@@ -149,7 +149,9 @@ def create_integration_item_metadata_object(
 
 async def get_items_notion(credentials: str) -> list[IntegrationItem] | None:
     """Aggregates all metadata relevant for a notion integration"""
-    parsed_credentials = json.loads(credentials)
+    parsed_credentials = json.loads(
+        credentials.encode("utf-8").decode("unicode_escape")
+    )
     response = requests.post(
         "https://api.notion.com/v1/search",
         headers={
