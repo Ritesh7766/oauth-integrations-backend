@@ -33,8 +33,18 @@ async def authorize_airtable(user_id: str, org_id: str) -> str:
     code_challenge = (
         base64.urlsafe_b64encode(m.digest()).decode("utf-8").replace("=", "")
     )
-    scope = "data.records:read data.records:write data.recordComments:read data.recordComments:write schema.bases:read schema.bases:write"
-    auth_url = f"{AirtableSettings.auth_url}&state={encoded_state}&code_challenge={code_challenge}&code_challenge_method=S256&scope={scope}"
+    scope = (
+        "data.records:read data.records:write "
+        "data.recordComments:read data.recordComments:write "
+        "schema.bases:read schema.bases:write"
+    )
+    auth_url = (
+        f"{AirtableSettings.auth_url}"
+        f"&state={encoded_state}"
+        f"&code_challenge={code_challenge}"
+        f"&code_challenge_method=S256"
+        f"&scope={scope}"
+    )
     await asyncio.gather(
         add_key_value_redis(
             f"airtable_state:{org_id}:{user_id}", json.dumps(state_data), expire=600
@@ -68,6 +78,7 @@ async def oauth2callback_airtable(request: Request) -> HTMLResponse:
     if not saved_state or original_state != json.loads(saved_state).get("state"):
         raise HTTPException(status_code=400, detail="State does not match.")
     async with httpx.AsyncClient() as client:
+        encoded_client_id_secret = AirtableSettings.encoded_client_id_secret
         response, _, _ = await asyncio.gather(
             client.post(
                 "https://airtable.com/oauth2/v1/token",
@@ -79,7 +90,7 @@ async def oauth2callback_airtable(request: Request) -> HTMLResponse:
                     "code_verifier": code_verifier.decode("utf-8"),
                 },
                 headers={
-                    "Authorization": f"Basic {AirtableSettings.encoded_client_id_secret}",
+                    "Authorization": f"Basic {encoded_client_id_secret}",
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
             ),
