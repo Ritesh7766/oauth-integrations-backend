@@ -24,13 +24,14 @@ The service handles:
 
 ## Project Structure
 
+```
 backend/
 ├── integrations/
-│ ├── airtable.py
-│ ├── hubspot.py
-│ ├── notion.py
-│ ├── base.py
-│ └── integrations_map.py
+│   ├── airtable.py
+│   ├── hubspot.py
+│   ├── notion.py
+│   ├── base.py
+│   └── integrations_map.py
 ├── redis_client.py
 ├── settings.py
 ├── main.py
@@ -38,7 +39,7 @@ backend/
 ├── docker-compose.yml
 ├── requirements.txt
 └── .env
-
+```
 
 ---
 
