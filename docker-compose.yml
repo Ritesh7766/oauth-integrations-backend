@@ -1,0 +1,20 @@
+services:
+  api:
+    build: .
+    container_name: integrations-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    volumes:
+      - .:/app  # remove in prod
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: integrations-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
