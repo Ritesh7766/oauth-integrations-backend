@@ -66,9 +66,11 @@ async def oauth2callback_airtable(request: Request) -> HTMLResponse:
     encoded_state = request.query_params.get("state")
     state_data = json.loads(base64.urlsafe_b64decode(encoded_state).decode("utf-8"))
 
-    original_state = state_data.get("state")
-    user_id = state_data.get("user_id")
-    org_id = state_data.get("org_id")
+    original_state, user_id, org_id = (
+        state_data.get("state"),
+        state_data.get("user_id"),
+        state_data.get("org_id"),
+    )
 
     saved_state, code_verifier = await asyncio.gather(
         get_value_redis(f"airtable_state:{org_id}:{user_id}"),
@@ -114,12 +116,17 @@ async def oauth2callback_airtable(request: Request) -> HTMLResponse:
 
 
 async def get_airtable_credentials(user_id: str, org_id: str) -> dict[str, Any]:
-    credentials = await get_value_redis(f"airtable_credentials:{org_id}:{user_id}")
-    if not credentials:
+    key = f"airtable_credentials:{org_id}:{user_id}"
+    raw = await get_value_redis(key)
+    if raw is None:
         raise HTTPException(status_code=400, detail="No credentials found.")
-    credentials = json.loads(credentials)
-    await delete_key_redis(f"airtable_credentials:{org_id}:{user_id}")
 
+    try:
+        credentials = json.loads(raw)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="Corrupted credentials data.")
+
+    await delete_key_redis(key)
     return credentials
 
 
