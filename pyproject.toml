@@ -1,2 +1,10 @@
 [tool.mypy]
 plugins = ["pydantic.mypy"]
+
+[tool.ruff]
+select = ["E", "F", "I"]
+fix = true
+
+[tool.ruff.isort]
+combine-as-imports = true
+force-sort-within-sections = true
