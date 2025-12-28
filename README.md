@@ -72,7 +72,7 @@ AIRTABLE_CLIENT_ID=your_client_id
 AIRTABLE_CLIENT_SECRET=your_client_secret
 AIRTABLE_AUTH_URL=https://airtable.com/oauth2/v1/authorize
 AIRTABLE_REDIRECT_URI=http://localhost:8000/integrations/airtable/oauth2callback
-
+```
 
 ---
 
