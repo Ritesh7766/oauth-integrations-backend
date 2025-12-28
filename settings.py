@@ -38,6 +38,15 @@ class AirtableSettings(Settings):
     )
 
 
+class HubspotSettings(Settings):
+    model_config = SettingsConfigDict(
+        env_prefix="HUBSPOT_",
+        env_file=".env",
+        extra="ignore",
+    )
+
+
 app_settings = AppSettings()
 notion_settings = NotionSettings()
 airtable_settings = AirtableSettings()
+hubspot_settings = HubspotSettings()
