@@ -10,7 +10,9 @@ from urllib.parse import urlencode
 from fastapi import HTTPException, Request
 from fastapi.responses import HTMLResponse
 import httpx
+import requests
 
+from integrations.integration_item import IntegrationItem
 from redis_client import add_key_value_redis, delete_key_redis, get_value_redis
 from settings import hubspot_settings
 
@@ -23,7 +25,7 @@ async def authorize_hubspot(user_id: str, org_id: str) -> str:
     }
     jsonified_state = json.dumps(state_data).encode("utf-8")
     encoded_state = base64.urlsafe_b64encode(jsonified_state).decode("utf-8")
-    scope = "oauth"
+    scope = "oauth " "crm.objects.companies.read"
     params = {
         "state": encoded_state,
         "scope": scope,
@@ -74,7 +76,7 @@ async def oauth2callback_hubspot(request: Request) -> HTMLResponse:
             delete_key_redis(f"hubspot_state:{org_id}:{user_id}"),
         )
     await add_key_value_redis(
-        f"airtable_credentials:{org_id}:{user_id}",
+        f"hubspot_credentials:{org_id}:{user_id}",
         json.dumps(response.json()),
         expire=600,
     )
@@ -105,11 +107,29 @@ async def get_hubspot_credentials(user_id: str, org_id: str) -> dict[str, Any]:
     return credentials
 
 
-async def create_integration_item_metadata_object(response_json):
-    # TODO
-    pass
+async def get_items_hubspot(credentials: str) -> list[IntegrationItem]:
+    parsed_credentials = json.loads(
+        credentials.encode("utf-8").decode("unicode_escape")
+    )
+    response = requests.get(
+        "https://api.hubspot.com/crm/v3/objects/companies",
+        headers={
+            "Authorization": f'Bearer {parsed_credentials.get("access_token")}',
+        },
+    ).json()
 
+    results = response.get("results", [])
 
-async def get_items_hubspot(credentials):
-    # TODO
-    pass
+    list_of_integration_item_metadata = []
+    for result in results:
+        list_of_integration_item_metadata.append(
+            IntegrationItem(
+                id=result.get("id"),
+                url=result.get("url"),
+                creation_time=result.get("createdAt"),
+                last_modified_time=result.get("updatedAt"),
+                name=result.get("properties", {}).get("name"),
+            )
+        )
+
+    return list_of_integration_item_metadata
