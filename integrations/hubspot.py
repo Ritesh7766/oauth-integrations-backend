@@ -4,6 +4,7 @@ import asyncio
 import base64
 import json
 import secrets
+from typing import Any
 from urllib.parse import urlencode
 
 from fastapi import HTTPException, Request
@@ -88,9 +89,20 @@ async def oauth2callback_hubspot(request: Request) -> HTMLResponse:
     return HTMLResponse(content=close_window_script)
 
 
-async def get_hubspot_credentials(user_id, org_id):
-    # TODO
-    pass
+async def get_hubspot_credentials(user_id: str, org_id: str) -> dict[str, Any]:
+    key = f"hubspot_credentials:{org_id}:{user_id}"
+
+    raw = await get_value_redis(key)
+    if raw is None:
+        raise HTTPException(status_code=400, detail="No credentials found.")
+
+    try:
+        credentials = json.loads(raw)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="Corrupted credentials data.")
+
+    await delete_key_redis(key)
+    return credentials
 
 
 async def create_integration_item_metadata_object(response_json):
