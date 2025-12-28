@@ -167,7 +167,5 @@ async def get_items_notion(credentials: str) -> list[IntegrationItem]:
             list_of_integration_item_metadata.append(
                 create_integration_item_metadata_object(result)
             )
-
-        print(list_of_integration_item_metadata)
-        return list_of_integration_item_metadata
+    print(list_of_integration_item_metadata)
     return list_of_integration_item_metadata
