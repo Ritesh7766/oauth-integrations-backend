@@ -2,23 +2,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 import base64
 
 
-class AppSettings(BaseSettings):
-    redis_url: str
-
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
-
-
-class NotionSettings(BaseSettings):
+class Settings(BaseSettings):
     client_id: str
     client_secret: str
     auth_url: str
     redirect_uri: str
-
-    model_config = SettingsConfigDict(
-        env_prefix="NOTION_",
-        env_file=".env",
-        extra="ignore",
-    )
 
     @property
     def encoded_client_id_secret(self) -> str:
@@ -27,5 +15,28 @@ class NotionSettings(BaseSettings):
         ).decode()
 
 
+class AppSettings(BaseSettings):
+    redis_url: str
+
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+
+class NotionSettings(Settings):
+    model_config = SettingsConfigDict(
+        env_prefix="NOTION_",
+        env_file=".env",
+        extra="ignore",
+    )
+
+
+class AirtableSettings(Settings):
+    model_config = SettingsConfigDict(
+        env_prefix="AIRTABLE_",
+        env_file=".env",
+        extra="ignore",
+    )
+
+
 app_settings = AppSettings()
 notion_settings = NotionSettings()
+airtable_settings = AirtableSettings()
