@@ -100,14 +100,18 @@ async def oauth2callback_notion(request: Request) -> HTMLResponse:
 
 
 async def get_notion_credentials(user_id: str, org_id: str):
-    credentials = await get_value_redis(f"notion_credentials:{org_id}:{user_id}")
-    if not credentials:
-        raise HTTPException(status_code=400, detail="No credentials found.")
-    credentials = json.loads(credentials)
-    if not credentials:
-        raise HTTPException(status_code=400, detail="No credentials found.")
-    await delete_key_redis(f"notion_credentials:{org_id}:{user_id}")
+    key = f"notion_credentials:{org_id}:{user_id}"
 
+    raw = await get_value_redis(key)
+    if raw is None:
+        raise HTTPException(status_code=400, detail="No credentials found.")
+
+    try:
+        credentials = json.loads(raw)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="Corrupted credentials data.")
+
+    await delete_key_redis(key)
     return credentials
 
 
@@ -121,10 +125,11 @@ def create_integration_item_metadata_object(
         if response_json["parent"]["type"] is None
         else response_json["parent"]["type"]
     )
-    if response_json["parent"]["type"] == "workspace":
-        parent_id = None
-    else:
-        parent_id = response_json["parent"][parent_type]
+    parent_id = (
+        None
+        if response_json["parent"]["type"] == "workspace"
+        else response_json["parent"][parent_type]
+    )
 
     name = _recursive_dict_search(response_json, "content") if name is None else name
     name = "multi_select" if name is None else name
